@@ -24,13 +24,13 @@ kubectl apply -f gitlab-svc.yaml
 kubectl apply -f gitlab-ingress.yaml
 ````
 
-1. [gitlab-pvc.yaml](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/gitlab/gitlab-pvc.yaml)
+1. [gitlab-pvc.yaml](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/gitlab/gitlab-pvc.yaml)
 
 > Note: Here in pvc.yaml, the storage class will be filesystem because deployment will try to attach storage.
 
-2. [gitlab-svc.yaml](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/gitlab/gitlab-svc.yaml)
-3. [gitlab-ingress.yaml (extensions/v1beta1)](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/gitlab/gitlab-ingress(extensions-v1beta1).yaml) or
-   [gitlab-ingress.yaml (networking.k8s.io/v1)](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/gitlab/gitlab-ingress(networking.k8s.io-v1).yaml)
+2. [gitlab-svc.yaml](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/gitlab/gitlab-svc.yaml)
+3. [gitlab-ingress.yaml (extensions/v1beta1)](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/gitlab/gitlab-ingress(extensions-v1beta1).yaml) or
+   [gitlab-ingress.yaml (networking.k8s.io/v1)](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/gitlab/gitlab-ingress(networking.k8s.io-v1).yaml)
 
 > Note: Here in ingress.yaml, there is not tls enabled because we will configure tls certificates
 > from inide the gitlab server. Just set the domain and we will setup the wild-certificate secrets following steps. 
@@ -43,7 +43,7 @@ Deploy the following deployment file
 kubectl apply -f gitlab-deploy.yaml
 ````
 
-1. [gitlab-deploy.yaml](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/gitlab/gitlab-deploy.yaml)
+1. [gitlab-deploy.yaml](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/gitlab/gitlab-deploy.yaml)
 
 There are certain components inside deployments:
 
@@ -52,9 +52,9 @@ There are certain components inside deployments:
   is `ns-privileged-sa`. To setup service account and bind roles to it deploy the following
   descriptors (if its not setup yet).
   
-  * [service-account.yaml](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/rbac/service-account.yaml)
-  * [clusterrole.yaml](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/rbac/clusterrole.yaml)
-  * [crb.yaml](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/descriptors/rbac/crb.yaml)
+  * [service-account.yaml](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/rbac/service-account.yaml)
+  * [clusterrole.yaml](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/rbac/clusterrole.yaml)
+  * [crb.yaml](https://github.com/shaekhhasanshoron/gitlab/blob/master/descriptors/rbac/crb.yaml)
 
 * `spec.template.spec.volumes[].name: cert-files` (Required) this value is required to set the existing certificates
 to gitlab. here the value `wild-certificate-secret` is the wild car secret name which contains certicate and private key for a domain.
@@ -68,7 +68,7 @@ to gitlab. here the value `wild-certificate-secret` is the wild car secret name 
 
 After deploying the deployment wait for pod to be running.
 
-![](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/static/1.gitlab.PNG)
+![](https://github.com/shaekhhasanshoron/gitlab/blob/master/static/1.gitlab.PNG)
 
 #### Step Three: Update the Gitlab Config and Restart Gitlab Server
 
@@ -79,7 +79,7 @@ First we need to `exec` into the gitlab pod.
 ```
 kubectl exec -it <pod name> -n <namespace> bash 
 ```
-![](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/static/2.gitlab.PNG)
+![](https://github.com/shaekhhasanshoron/gitlab/blob/master/static/2.gitlab.PNG)
 
 
 Now after entering into the pod, open the config file ` /etc/gitlab/gitlab.rb`
@@ -88,7 +88,7 @@ Now after entering into the pod, open the config file ` /etc/gitlab/gitlab.rb`
  vi /etc/gitlab/gitlab.rb
 ```
 
-![](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/static/3.gitlab.PNG)
+![](https://github.com/shaekhhasanshoron/gitlab/blob/master/static/3.gitlab.PNG)
 
 Now we have to edit the following config to the file.
 
@@ -97,7 +97,7 @@ connection
 ```
 external_url 'https://gitlab.console.klovercloud.com'
 ```
-![](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/static/4.gitlab-config.PNG)
+![](https://github.com/shaekhhasanshoron/gitlab/blob/master/static/4.gitlab-config.PNG)
 
 2. We need to set the certificate and private key path and enable nginx https. **The path must be match with whatever we have set in the deployment 
 descriptor**.
@@ -112,11 +112,11 @@ nginx['ssl_protocols'] = "TLSv1.2 TLSv1.3"
 ````
 
 
-![](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/static/5.gitlab-config.PNG)
+![](https://github.com/shaekhhasanshoron/gitlab/blob/master/static/5.gitlab-config.PNG)
 
 > Note: In vim Editor to search a text write `/<searched text>` and press enter
 
-![](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/static/6.shortcut-vim.PNG)
+![](https://github.com/shaekhhasanshoron/gitlab/blob/master/static/6.shortcut-vim.PNG)
 
 3. Now save and exit the file from vim editor
 
@@ -130,7 +130,7 @@ nginx['ssl_protocols'] = "TLSv1.2 TLSv1.3"
  gitlab-ctl reconfigure
 ```
 
-![](https://github.com/shaekhhasanshoron/SSO-Keycloak/blob/main/static/7.gitlab-config.PNG)
+![](https://github.com/shaekhhasanshoron/gitlab/blob/master/static/7.gitlab-config.PNG)
 
 5. Exit from the pod with the following command
 
