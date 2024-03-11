@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-server
+  namespace: gitlab
+spec:
+  minReadySeconds: 25
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: gitlab-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: gitlab-server
+    spec:
+      containers:
+        - image: gitlab/gitlab-ce:13.6.3-ce.0
+          imagePullPolicy: IfNotPresent
+          name: gitlab-server
+          ports:
+            - containerPort: 80
+              protocol: TCP
+            - containerPort: 443
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "4"
+              memory: 10Gi
+            requests:
+              cpu: "2"
+              memory: 10Gi
+          volumeMounts:
+            - mountPath: /etc/gitlab
+              name: gitlab-data
+              subPath: rfs/etc/gitlab
+            - mountPath: /var/log/gitlab
+              name: gitlab-data
+              subPath: rfs/var/log/gitlab
+            - mountPath: /var/opt/gitlab
+              name: gitlab-data
+              subPath: rfs/var/opt/gitlab
+            - mountPath: /pv
+              name: gitlab-data
+            - name: cert-files
+              mountPath: "/etc/gitlab/ssl/gitlab.example.com.crt"
+              subPath: tls.crt
+            - name: cert-files
+              mountPath: "/etc/gitlab/ssl/gitlab.example.com.key"
+              subPath: tls.key
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 2000
+      serviceAccountName: ns-privileged-sa
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: gitlab-data
+          persistentVolumeClaim:
+            claimName: gitlab-data
+        - name: cert-files
+          secret:
+            secretName: wild-certificate-secret # secret for console.klovercloud.com
